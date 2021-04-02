@@ -22,7 +22,7 @@ But first of all, **reading chapter [Before You Start](#trumpet-before-you-start
 
 2. **Navigate to the end of `VsDevCmd.bat`, add `pushd %userprofile%\repo\cpp` before `exit /B 0`**, as shown in below image. Remember to **replace the path with the one to the `cpp` repo on your PC**. `%userprofile%` is your user directory (e.g. `C:\Users\your-name`) in Windows OS.
 
-   ![image-before-you-start-vsdevcmd-bat](\README.assets\image-before-you-start-vsdevcmd-bat.png)
+   ![image-before-you-start-vsdevcmd-bat](README.assets/image-before-you-start-vsdevcmd-bat.png)
 
 3. **Better create a shortcut for `VsDevCmd.bat`**, and then:
 
@@ -30,11 +30,11 @@ But first of all, **reading chapter [Before You Start](#trumpet-before-you-start
 
    - navigate to `Shortcut` tab, click `Advanced...` button, as shown in below image
 
-     ![image-vsdevcmd-properties](\README.assets\image-vsdevcmd-properties.png)
+     ![image-vsdevcmd-properties](README.assets/image-vsdevcmd-properties.png)
 
    - Opt in `Run as administrator`, as shown in below screenshot
 
-     ![image-vsdevcmd-properties-admin](\README.assets\image-vsdevcmd-properties-admin.png)
+     ![image-vsdevcmd-properties-admin](README.assets/image-vsdevcmd-properties-admin.png)
 
    - Click `OK`, as well as`OK` in properties window
 
