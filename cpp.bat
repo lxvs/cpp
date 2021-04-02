@@ -11,7 +11,7 @@
 @REM
 @REM    init a new chapter (e.g. ch.6, having 18 exercises) by:
 @REM        creating the folder ch-6
-@REM        copying template.c to ch-6\6-1.c ch-6\6-2.c ... ch-6\6-18.c
+@REM        copying TEMPLATE to ch-6\6-1.c, ch-6\6-2.c, ..., ch-6\6-18.c
 @REM
 @REM    errorlevel value returned
 @REM    0           exit expectedly
@@ -35,31 +35,32 @@
 @REM    202         number of exercises is not provided
 @REM    203/204     chapter number is too low/ too high
 @REM    205/206     exercise number is too low/ too high
-@REM    207         the specified c file does not exist
+@REM    207         the specified C file does not exist
 @REM
 @REM cpp edit <chapter> [ <exercise> | n[ext] ] [<editor>]
 @REM
 @REM    Use <editor> to edit ch-<chapter>\<chapter>-<exercise>.c
 @REM
-@REM    If "next" is specified, will open the first c file different
-@REM        from TEMPLATE. If all c files are different from TEMPLATE,
-@REM        will create a new c file of next exercise from TEMPLATE and
+@REM    If "next" is specified, will open the first C file different
+@REM        from TEMPLATE. If all C files are different from TEMPLATE,
+@REM        will create a new C file of next exercise from TEMPLATE and
 @REM        open it with <editor>
 @REM    If <exercise> and "next" are both omitted, "next" is implied
-@REM    If <editor> is omitted, will use gvim
+@REM    If <editor> is omitted, will use DEFAULT_EDITOR (default is Vim)
 @REM
 @REM    errorlevel value returned
 @REM    0           exit expectedly
 @REM    301         chapter is not provided
 @REM    302         exercise provided is invalid
 @REM    303/304     chapter number is too low/ too high
-@REM    306         the number of existed exercises is MAX_EX
+@REM    305/306     exercise number is too low/ too high
 @REM    307         file TEMPLATE does not exist
-@REM    310         editor provided is invalid
+@REM    308         the number of existed exercises is already MAX_EX
+@REM    310         editor provided or DEFAULT_EDITOR is invalid
 @REM
 @REM cpp clean [ n | dry ]
 @REM
-@REM    clean c files that are same with TEMPLATE
+@REM    clean C files that are same with TEMPLATE
 @REM
 @REM    If "dry" or "n" is specified, won't actually delete anything, just
 @REM        show what would be done
@@ -76,12 +77,13 @@
 
 @setlocal EnableExtensions EnableDelayedExpansion
 
-@set /a "MIN_CH=1"
-@set /a "MAX_CH=17"
-@set /a "MIN_EX=1"
-@set /a "MAX_EX=99"
+@if not defined MIN_CH set /a "MIN_CH=1"
+@if not defined MAX_CH set /a "MAX_CH=17"
+@if not defined MIN_EX set /a "MIN_EX=1"
+@if not defined MAX_EX set /a "MAX_EX=99"
 
-@set "TEMPLATE=template.c"
+@if not defined TEMPLATE set "TEMPLATE=template.c"
+@if not defined DEFAULT_EDITOR set "DEFAULT_EDITOR=Vim"
 
 @set op=
 @if /i "%~1" == "init" set "op=%~1"
@@ -104,7 +106,7 @@
 
 :post_loop_gather_arg
 @call:%op%%allArgs%
-@if %errorlevel% NEQ 0 echo cpp-%op%: warning: exit with error %errorlevel%
+@if %errorlevel% NEQ 0 echo cpp-%op%: exit with error %errorlevel%
 @exit /b
 
 :Init
@@ -199,6 +201,11 @@
     @if %ch% LSS %MIN_CH% exit /b 303
     @if %ch% GTR %MAX_CH% exit /b 304
 
+    @if not exist ch-%ch%\ md ch-%ch% || (
+        echo cpp-edit: error: failed to create directory ch-%ch%
+        exit /b 1
+    )
+
     @set found=
     @if "%ex%" == "next" (
         for /L %%i in (%MIN_EX%, 1, %MAX_EX%) do @if not defined found (
@@ -209,7 +216,7 @@
             )
         )
 
-        if not defined found exit /b 306
+        if not defined found exit /b 308
 
         set "fte=ch-%ch%\%ch%-!found!.c"
         REM fte means file to edit
@@ -222,9 +229,15 @@
                 exit /b
             )
         )
+    ) else (
+        REM else of if "%ex%" == "next"
+
+        if %ex% LSS %MIN_EX% exit /b 305
+        if %ex% GTR %MAX_EX% exit /b 306
+        set "fte=ch-%ch%\%ch%-%ex%.c"
     )
 
-    @if "%~3" == "" (set "editor=gvim") else set "editor=%~3"
+    @if "%~3" == "" (set "editor=%DEFAULT_EDITOR%") else set "editor=%~3"
 
     @where %editor% 1>NUL 2>&1 && (call %editor% %fte%) || exit /b 310
 
@@ -244,8 +257,8 @@
         ) else exit /b 401
     )
 
-    @for /f %%i in ('dir /b /ad ch-*') do @(
-        for /f %%j in ('dir /b /a-d %%i\*.c') do @(
+    @for /f %%i in ('dir /b /ad ch-* 2^>NUL') do @(
+        for /f %%j in ('dir /b /a-d %%i\*.c 2^>NUL') do @(
             fc %TEMPLATE% "%%i\%%j" 1>NUL 2>&1 && (
                 if "%dry%" == "" (
                     del "%%i\%%j" 1>NUL && echo Deleted %%i\%%j
@@ -254,6 +267,7 @@
                 )
             )
         )
+        if "%dry%" == "" rd %%i 2>NUL && echo Removed %%i
     )
 
     @if %errorlevel% NEQ 1 if %errorlevel% NEQ 0 echo cpp-clean: warning: error level is %errorlevel% while script ended expectedly
