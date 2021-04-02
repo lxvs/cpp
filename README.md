@@ -4,9 +4,9 @@ This repo is intended for self use, but welcome you to have a try if it helps.
 
 It (`cpp.bat`) has 4 operation (`init`, `cl`, `edit`, `clean`), which can:
 
-- [initialize every exercise of a chapter from TEMPLATE](#slotmachine-initialize-every-exercise-of-a-chapter-from-template)
+- [initialize every exercise of a chapter from TEMPLATE](#slot_machine-initialize-every-exercise-of-a-chapter-from-template)
 - [compile, run and clean with a single command](#guitar-compile-run-and-clean-with-a-single-command)
-- [edit or create (from TEMPLATE) a C file with your favorite editor](#writinghand-edit-or-create-from-template-a-c-file-with-your-favorite-editor)
+- [edit or create (from TEMPLATE) a C file with your favorite editor](#writing_hand-edit-or-create-from-template-a-c-file-with-your-favorite-editor)
 - [clean C files that unmodified (i.e. still same with TEMPLATE)](#bathtub-clean-c-files-that-unmodified-ie-still-same-with-template)
 
 But first of all, **reading chapter [Before You Start](#trumpet-before-you-start) and [Environment Variables](#symbols-environment-variables)** is highly recommended.
