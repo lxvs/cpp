@@ -5,7 +5,7 @@
 @REM
 @REM Usage: cpp <operation> [<argument> ...]
 @REM
-@REM    Operation: init, cl, edit
+@REM    Operation: init, cl, edit, clean
 @REM
 @REM cpp init <chapter> <number-of-exercises>
 @REM
@@ -56,6 +56,17 @@
 @REM    306         the number of existed exercises is MAX_EX
 @REM    307         file TEMPLATE does not exist
 @REM    310         editor provided is invalid
+@REM
+@REM cpp clean [ n | dry ]
+@REM
+@REM    clean c files that are same with TEMPLATE
+@REM
+@REM    If "dry" or "n" is specified, won't actually delete anything, just
+@REM        show what would be done
+@REM
+@REM    errorlevel value returned
+@REM    0           exit expectedly
+@REM    401         argument provided is invalid
 
 @if "%~1" == "" (
     echo Error: no operation provided
@@ -76,6 +87,7 @@
 @if /i "%~1" == "init" set "op=%~1"
 @if /i "%~1" == "cl" set "op=%~1"
 @if /i "%~1" == "edit" set "op=%~1"
+@if /i "%~1" == "clean" set "op=%~1"
 
 @if "%op%" == "" (
     echo Error: invalid operation: %~1
@@ -164,7 +176,7 @@
         if /i "%clean%" == "clean" del %ch%-%ex%.exe %ch%-%ex%.obj
     ) else exit /b
 
-    @if %errorlevel% NEQ 0 echo cpp-init: warning: error level is %errorlevel% while script ended expectedly.
+    @if %errorlevel% NEQ 0 echo cpp-cl: warning: error level is %errorlevel% while script ended expectedly.
     @exit /b 0
 
 :Edit
@@ -217,4 +229,33 @@
     @where %editor% 1>NUL 2>&1 && (call %editor% %fte%) || exit /b 310
 
     @if %errorlevel% NEQ 0 echo cpp-edit: warning: error level is %errorlevel% while script ended expectedly.
+    @exit /b 0
+
+:Clean
+@REM clean [ n | dry ]
+
+    @set dry=
+
+    @if not "%~1" == "" (
+        if /i "%~1" == "n" (
+            set "dry=dry"
+        ) else if /i "%~1" == "dry" (
+            set "dry=dry"
+        ) else exit /b 401
+    )
+
+    @for /f %%i in ('dir /b /ad ch-*') do @(
+        for /f %%j in ('dir /b /a-d %%i\*.c') do @(
+            fc %TEMPLATE% "%%i\%%j" 1>NUL 2>&1 && (
+                if "%dry%" == "" (
+                    del "%%i\%%j" 1>NUL && echo Deleted %%i\%%j
+                ) else (
+                    echo Would delete %%i\%%j
+                )
+            )
+        )
+    )
+
+    @if %errorlevel% NEQ 1 if %errorlevel% NEQ 0 echo cpp-clean: warning: error level is %errorlevel% while script ended expectedly
+    @REM FC command will set errorlevel to 1 expectedly
     @exit /b 0
