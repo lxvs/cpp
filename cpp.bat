@@ -1,7 +1,7 @@
 @REM This script is used in repo github.com/lxvs/cpp
 @REM Author:        lxvs <jn.apsd+batch@gmail.com>
 @REM Created:       2021-04-01
-@REM Last updated:  2021-04-02
+@REM Last updated:  2021-04-12
 @REM
 @REM Usage: cpp <operation> [<argument> ...]
 @REM
@@ -219,22 +219,22 @@
         if not defined found exit /b 308
 
         set "fte=ch-%ch%\%ch%-!found!.c"
-        REM fte means file to edit
-
-        if not exist !fte! (
-            echo cpp-edit: would create file !fte!
-            copy %TEMPLATE% !fte! 1>NUL
-            if !errorlevel! NEQ 0 (
-                echo cpp-edit: error: failed to copy %TEMPLATE% to !fte!
-                exit /b
-            )
-        )
+        @REM fte means file to edit
     ) else (
-        REM else of if "%ex%" == "next"
+        @REM else of if "%ex%" == "next"
 
         if %ex% LSS %MIN_EX% exit /b 305
         if %ex% GTR %MAX_EX% exit /b 306
         set "fte=ch-%ch%\%ch%-%ex%.c"
+    )
+
+    @if not exist %fte% (
+        @echo cpp-edit: would create file %fte%
+        copy %TEMPLATE% %fte% 1>NUL
+        if !errorlevel! NEQ 0 (
+            @echo cpp-edit: error: failed to copy %TEMPLATE% to %fte%
+            @exit /b
+        )
     )
 
     @if "%~3" == "" (set "editor=%DEFAULT_EDITOR%") else set "editor=%~3"
