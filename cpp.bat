@@ -1,7 +1,7 @@
 @REM This script is used in repo github.com/lxvs/cpp
 @REM Author:        lxvs <jn.apsd+batch@gmail.com>
 @REM Created:       2021-04-01
-@REM Last updated:  2021-04-12
+@REM Last updated:  2021-04-18
 @REM
 @REM Usage: cpp <operation> [<argument> ...]
 @REM
@@ -172,14 +172,18 @@
         set "clean=clean"
     )
 
-    @call cl ch-%ch%\%ch%-%ex%.c
+    @cl /nologo ch-%ch%\%ch%-%ex%.c
     @if %errorlevel% EQU 0 (
-        if /i "%run%" == "run" call %ch%-%ex%.exe
+        if /i "%run%" == "run" (
+            %ch%-%ex%.exe
+            set /a errlvl=!errorlevel!
+        )
         if /i "%clean%" == "clean" del %ch%-%ex%.exe %ch%-%ex%.obj
     ) else exit /b
 
     @if %errorlevel% NEQ 0 echo cpp-cl: warning: error level is %errorlevel% while script ended expectedly.
-    @exit /b 0
+    @if not "%errlvl%" == "" if not "%errlvl%" == "0" echo cpp-cl: %ch%-%ex%.exe returns %errlvl%
+    @exit /b %errlvl%
 
 :Edit
 @REM edit <chapter> [ <exercise> | n[ext] ] [<editor>]
@@ -239,7 +243,7 @@
 
     @if "%~3" == "" (set "editor=%DEFAULT_EDITOR%") else set "editor=%~3"
 
-    @where %editor% 1>NUL 2>&1 && (call %editor% %fte%) || exit /b 310
+    @where %editor% 1>NUL 2>&1 && (%editor% %fte%) || exit /b 310
 
     @if %errorlevel% NEQ 0 echo cpp-edit: warning: error level is %errorlevel% while script ended expectedly.
     @exit /b 0
