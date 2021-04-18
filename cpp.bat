@@ -106,7 +106,13 @@
 
 :post_loop_gather_arg
 @call:%op%%allArgs%
-@if %errorlevel% NEQ 0 echo cpp-%op%: exit with error %errorlevel%
+@if %errorlevel% NEQ 0 (
+    if /i not "%op%" == "cl" (
+        echo cpp-%op%: exit with error %errorlevel%
+    ) else (
+        if not "%errlvl%" == "%errorlevel%" echo cpp-%op%: exit with error %errorlevel%
+    )
+)
 @exit /b
 
 :Init
