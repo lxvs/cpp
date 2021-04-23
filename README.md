@@ -57,8 +57,9 @@ But first of all, **reading chapter [Before You Start](#trumpet-before-you-start
 
 You can modify the variable values in either of following methods:
 
-* Set the variables in CMD
 * Change their default values in `cpp.bat`
+* Set the variables in CMD
+* Add them to your [environment variables](https://lxvs.github.io/doc/env-var)
 
 
 
