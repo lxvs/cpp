@@ -1,0 +1,77 @@
+#!/bin/bash
+
+if [[ $# -eq 0 ]]; then
+    echo "Error: no operation provided" >&2
+    echo "Read this script in editor for detailed usage" >&2
+    exit 1
+fi
+
+[[ -z $MIN_CH ]] && MIN_CH=1
+[[ -z $MAX_CH ]] && MAX_CH=17
+[[ -z $MIN_EX ]] && MIN_EX=1
+[[ -z $MAX_EX ]] && MAX_EX=99
+
+[[ -z $TEMPLATE ]] && TEMPLATE="template.c"
+[[ -z $DEFAULT_EDITOR ]] && DEFAULT_EDITOR=vim
+
+function Operate {
+    case $1 in
+        "init")
+            [[ $# -eq 3 ]] || return 102
+            [[ $2 -lt $MIN_CH ]] && return 103
+            [[ $2 -gt $MAX_CH ]] && return 104
+            [[ $3 -lt $MIN_EX ]] && return 105
+            [[ $3 -gt $MAX_EX ]] && return 106
+            [[ -e $TEMPLATE ]] || return 107
+
+            [[ -d ch-$2 ]] || mkdir ch-$2
+            if [[ $? -ne 0 ]];then
+                echo "gcpp-$1: failed to make directory 'ch-$2'"
+                return
+            fi
+
+            pushd ch-$2 > /dev/null
+            if [[ $? -ne 0 ]];then
+                echo "gcpp-$1: failed to navigate to directory 'ch-$2'"
+                return
+            fi
+
+            for ((ex=1;ex<=$3;ex++))
+            do
+                if [[ -e $2-$ex.c ]]; then
+                    echo gcpp-$1: warning: $2-$ex.c exists, skipped.
+                else
+                    cp "../$TEMPLATE" $2-$ex.c && echo "gcpp-$1: $2-$ex.c copied." || echo "gcpp-$1: warning: failed to copy $2-$ex.c"
+                fi
+            done
+            ;;
+
+        "gcc")
+
+            ;;
+
+        "edit")
+
+            ;;
+
+        "clean")
+
+            ;;
+
+        *)  exit 99999
+            ;;
+    esac
+}
+
+case $1 in
+    "init"|"gcc"|"edit"|"clean")
+        Operate $@
+        ;;
+    *)  echo "gcpp: invalid operation: $1"
+        exit 1
+        ;;
+esac
+
+errlvl=$?
+[[ $errlvl -ne 0 ]] && echo "gcpp: warning: script ended with error $errlvl"
+exit $errlvl
