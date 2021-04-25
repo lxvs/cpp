@@ -47,6 +47,40 @@ function Operate {
             ;;
 
         "gcc")
+            [[ $# -ge 3 ]] || return 202
+            [[ $2 -lt $MIN_CH ]] && return 203
+            [[ $2 -gt $MAX_CH ]] && return 204
+            [[ $3 -lt $MIN_EX ]] && return 205
+            [[ $3 -gt $MAX_EX ]] && return 206
+            [[ -e ch-$2/$2-$3.c ]] || return 207
+
+            run=$4
+            cln=$5
+
+            if [[ $run == "rc" && -z $cln ]]; then
+                run="run"
+                cln="clean"
+            else
+                [[ $run == "r" ]] && run="run"
+                [[ $cln == "c" ]] && cln="clean"
+            fi
+
+            out=./$2-$3.out
+            gcc ch-$2/$2-$3.c -o $out
+            
+            # FIXME: must include -lm parameter to complie c files with math.h
+
+            if [[ $? -eq 0 ]]; then
+                if [[ $run == "run" ]]; then
+                    chmod +x $out
+                    $out
+                    errlvl=$?
+                    [[ $errlvl -ne 0 ]] && echo "gcpp-$1: $2-$3 returns $errlvl"
+                fi
+                [[ $cln == "clean" ]] && rm -f $out ./$2-$3.obj
+            else
+                return
+            fi
 
             ;;
 
