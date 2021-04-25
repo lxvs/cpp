@@ -106,13 +106,7 @@
 
 :post_loop_gather_arg
 @call:%op%%allArgs%
-@if %errorlevel% NEQ 0 (
-    if /i not "%op%" == "cl" (
-        echo cpp-%op%: exit with error %errorlevel%
-    ) else (
-        if not "%errlvl%" == "%errorlevel%" echo cpp-%op%: exit with error %errorlevel%
-    )
-)
+@if %errorlevel% NEQ 0 if /i not "%op%" == "cl" echo cpp-%op%: exit with error %errorlevel%
 @exit /b
 
 :Init
@@ -171,25 +165,26 @@
     @set "run=%~3"
     @set "clean=%~4"
 
-    @if /i "%run%" == "r" set "run=run"
-    @if /i "%clean%" == "c" set "clean=clean"
-    @if /i "%run%" == "rc" if "%clean%" == "" (
-        set "run=run"
-        set "clean=clean"
+    @if /i "%run%" == "rc" (
+        if "%clean%" == "" (
+            set "run=run"
+            set "clean=clean"
+        )
+    ) else (
+        if /i "%run%" == "r" set "run=run"
+        if /i "%clean%" == "c" set "clean=clean"
     )
 
     @cl /nologo ch-%ch%\%ch%-%ex%.c
     @if %errorlevel% EQU 0 (
         if /i "%run%" == "run" (
             %ch%-%ex%.exe
-            set /a errlvl=!errorlevel!
+            @if not "!errorlevel!" == "0" echo cpp-cl: %ch%-%ex%.exe returns !errorlevel!
         )
         if /i "%clean%" == "clean" del %ch%-%ex%.exe %ch%-%ex%.obj
     ) else exit /b
 
-    @if %errorlevel% NEQ 0 echo cpp-cl: warning: error level is %errorlevel% while script ended expectedly.
-    @if not "%errlvl%" == "" if not "%errlvl%" == "0" echo cpp-cl: %ch%-%ex%.exe returns %errlvl%
-    @exit /b %errlvl%
+    @exit /b
 
 :Edit
 @REM edit <chapter> [ <exercise> | n[ext] ] [<editor>]
