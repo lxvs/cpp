@@ -6,23 +6,23 @@ if [[ $# -eq 0 ]]; then
     exit 1
 fi
 
-[[ -z $MIN_CH ]] && MIN_CH=1
-[[ -z $MAX_CH ]] && MAX_CH=17
-[[ -z $MIN_EX ]] && MIN_EX=1
-[[ -z $MAX_EX ]] && MAX_EX=99
+[[ -z ${MIN_CH+set} ]] && declare -i MIN_CH=1
+[[ -z ${MAX_CH+set} ]] && declare -i MAX_CH=17
+[[ -z ${MIN_EX+set} ]] && declare -i MIN_EX=1
+[[ -z ${MAX_EX+set} ]] && declare -i MAX_EX=99
 
-[[ -z $TEMPLATE ]] && TEMPLATE="template.c"
-[[ -z $DEFAULT_EDITOR ]] && DEFAULT_EDITOR=vim
+[[ -z ${TEMPLATE+set} ]] && TEMPLATE="template.c"
+[[ -z ${DEFAULT_EDITOR+set} ]] && DEFAULT_EDITOR=vim
 
 function Operate {
     case $1 in
         "init")
-            [[ $# -eq 3 ]] || return 102
-            [[ $2 -lt $MIN_CH ]] && return 103
-            [[ $2 -gt $MAX_CH ]] && return 104
-            [[ $3 -lt $MIN_EX ]] && return 105
-            [[ $3 -gt $MAX_EX ]] && return 106
-            [[ -e $TEMPLATE ]] || return 107
+            [[ $# -eq 3 ]] || return 32
+            [[ $2 -lt $MIN_CH ]] && return 33
+            [[ $2 -gt $MAX_CH ]] && return 34
+            [[ $3 -lt $MIN_EX ]] && return 35
+            [[ $3 -gt $MAX_EX ]] && return 36
+            [[ -e $TEMPLATE ]] || return 37
 
             [[ -d ch-$2 ]] || mkdir ch-$2
             if [[ $? -ne 0 ]];then
@@ -47,12 +47,12 @@ function Operate {
             ;;
 
         "gcc")
-            [[ $# -ge 3 ]] || return 202
-            [[ $2 -lt $MIN_CH ]] && return 203
-            [[ $2 -gt $MAX_CH ]] && return 204
-            [[ $3 -lt $MIN_EX ]] && return 205
-            [[ $3 -gt $MAX_EX ]] && return 206
-            [[ -e ch-$2/$2-$3.c ]] || return 207
+            [[ $# -ge 3 ]] || return 64
+            [[ $2 -lt $MIN_CH ]] && return 65
+            [[ $2 -gt $MAX_CH ]] && return 66
+            [[ $3 -lt $MIN_EX ]] && return 67
+            [[ $3 -gt $MAX_EX ]] && return 68
+            [[ -e ch-$2/$2-$3.c ]] || return 69
 
             run=$4
             cln=$5
@@ -67,15 +67,15 @@ function Operate {
 
             out=./$2-$3.out
             gcc ch-$2/$2-$3.c -o $out
-            
+
             # FIXME: must include -lm parameter to complie c files with math.h
 
             if [[ $? -eq 0 ]]; then
                 if [[ $run == "run" ]]; then
                     chmod +x $out
                     $out
-                    errlvl=$?
-                    [[ $errlvl -ne 0 ]] && echo "gcpp-$1: $2-$3 returns $errlvl"
+                    local out_err=$?
+                    [[ $out_err -ne 0 ]] && echo "gcpp-$1: $2-$3 returns $out_err"
                 fi
                 [[ $cln == "clean" ]] && rm -f $out ./$2-$3.obj
             else
@@ -86,26 +86,74 @@ function Operate {
 
         "edit")
 
+            [[ $# -ge 2 ]] || return 96
+            [[ -e $TEMPLATE ]] || return 102
+
+            if [[ $3 == "" || $3 == "n" ]]; then
+                local ex="next"
+            elif [[ $3 != "next" ]]; then
+                declare -i ex=$3
+                [[ $ex == $3 ]] || return 97
+            fi
+
+            [[ $2 -ge $MIN_CH ]] || return 98
+            [[ $2 -le $MAX_CH ]] || return 99
+
+            if [[ ! -d ch-$2 ]]; then
+                mkdir ch-$2
+                [[ $? -eq 0 ]] || return
+            fi
+
+            local fte   # file to edit
+            local editor
+            if [[ $ex == "next" ]]; then
+                # FIXME
+                echo "Sorry! 'next' argument is under development!"
+                echo "Please specify the exercise number for now."
+                return 127
+            else
+                [[ $ex -ge $MIN_EX ]] || return 100
+                [[ $ex -le $MAX_EX ]] || return 101
+                fte="ch-$2/$2-$3.c"
+            fi
+
+            if [[ ! -e $fte ]]; then
+                echo "gcpp-$1: would create file $fte"
+                cp $TEMPLATE $fte 1>/dev/null
+                if [[ $? -ne 0 ]]; then
+                    echo "gcpp-$1: failed to copy $TEMPLATE to $fte"
+                    return
+                fi
+            fi
+
+            editor=${4:-$DEFAULT_EDITOR}
+
+            which $editor 1>/dev/null 2>&1 && $editor $fte || return 104
+
+            return 0
+
             ;;
 
         "clean")
 
             ;;
 
-        *)  exit 99999
+        *)  return 255
             ;;
     esac
 }
 
+declare -i errlvl=0
+
 case $1 in
     "init"|"gcc"|"edit"|"clean")
         Operate $@
+        errlvl=$?
         ;;
     *)  echo "gcpp: invalid operation: $1"
         exit 1
         ;;
 esac
 
-errlvl=$?
 [[ $errlvl -ne 0 ]] && echo "gcpp: warning: script ended with error $errlvl"
 exit $errlvl
