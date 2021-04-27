@@ -179,11 +179,24 @@ function Operate {
 
             local fte   # file to edit
             local editor
+            local found=""
             if [[ $ex == "next" ]]; then
-                # FIXME
-                echo "Sorry! 'next' argument is under development!"
-                echo "Please specify the exercise number for now."
-                return 127
+                local i=$MIN_EX
+                for ((;i<=$MAX_EX;i++))
+                do
+                    if [[ -z $found ]]; then
+                        if [[ -e ch-$2/$2-$i.c ]]; then
+                            cmp -s $TEMPLATE "ch-$2/$2-$i.c" && found=$i
+                        else
+                            found=$i
+                        fi
+                    fi
+                done
+
+                [[ ! -z $found ]] || return 103
+
+                fte="ch-$2/$2-$found.c"
+
             else
                 [[ $ex -ge $MIN_EX ]] || return 100
                 [[ $ex -le $MAX_EX ]] || return 101
