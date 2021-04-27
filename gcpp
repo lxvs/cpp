@@ -136,6 +136,32 @@ function Operate {
 
         "clean")
 
+            local dry
+
+            if [[ ! -z ${2+set} ]]; then
+                [[ $2 == "n" || $2 == "dry" ]] && $dry="dry" || return 128
+            fi
+
+            for i in $(ls -d ch-* 2>/dev/null)
+            do
+                for j in $(ls $i/*.c 2>/dev/null)
+                do
+                    if cmp -s "$TEMPLATE" "$j"; then
+                        if [[ $dry == "" ]]; then
+                            rm -f "$j" 1>/dev/null
+                            echo "Deleted $j"
+                        else
+                            echo "Would delete $j"
+                        fi
+                    fi
+                done
+                if [[ $dry == "" ]]; then
+                    rmdir $i 2>/dev/null && echo "Removed $i"
+                fi
+            done
+
+            return 0
+
             ;;
 
         *)  return 255
