@@ -14,12 +14,11 @@
 @REM        copying TEMPLATE to ch-6\6-1.c, ch-6\6-2.c, ..., ch-6\6-18.c
 @REM
 @REM    errorlevel value returned
-@REM    0           exit expectedly
-@REM    101         chapter is not provided
-@REM    102         number of exercises is not provided
-@REM    103/104     chapter number is too low/ too high
-@REM    105/106     exercise number is too low/ too high
-@REM    107         file TEMPLATE does not exist
+@REM    0           0x00        exit expectedly
+@REM    33          0x21        number of exercises is not provided
+@REM    34/35       0x22/0x23   chapter number is too low/ too high
+@REM    36/37       0x24/0x25   exercise number is too low/ too high
+@REM    38          0x26        file TEMPLATE does not exist
 @REM
 @REM cpp cl <chapter> <exercise> [ r[un] [ c[lean] ] ]
 @REM
@@ -30,12 +29,11 @@
 @REM    You can use "rc" to specify run and clean
 @REM
 @REM    errorlevel value returned
-@REM    0           exit expectedly
-@REM    201         chapter is not provided
-@REM    202         number of exercises is not provided
-@REM    203/204     chapter number is too low/ too high
-@REM    205/206     exercise number is too low/ too high
-@REM    207         the specified C file does not exist
+@REM    0           0x00        exit expectedly
+@REM    65          0x41        number of exercises is not provided
+@REM    66/67       0x42/0x43   chapter number is too low/ too high
+@REM    68/69       0x44/0x45   exercise number is too low/ too high
+@REM    71          0x47        the specified C file does not exist
 @REM
 @REM cpp edit <chapter> [ <exercise> | n[ext] ] [<editor>]
 @REM
@@ -49,14 +47,14 @@
 @REM    If <editor> is omitted, will use DEFAULT_EDITOR (default is Vim)
 @REM
 @REM    errorlevel value returned
-@REM    0           exit expectedly
-@REM    301         chapter is not provided
-@REM    302         exercise provided is invalid
-@REM    303/304     chapter number is too low/ too high
-@REM    305/306     exercise number is too low/ too high
-@REM    307         file TEMPLATE does not exist
-@REM    308         the number of existed exercises is already MAX_EX
-@REM    310         editor provided or DEFAULT_EDITOR is invalid
+@REM    0           0x00        exit expectedly
+@REM    96          0x60        chapter is not provided
+@REM    97          0x61        exercise provided is invalid
+@REM    98/99       0x62/0x63   chapter number is too low/ too high
+@REM    100/101     0x64/0x65   exercise number is too low/ too high
+@REM    102         0x66        file TEMPLATE does not exist
+@REM    103         0x67        the number of existed exercises is MAX_EX
+@REM    104         0x68        editor provided or DEFAULT_EDITOR is invalid
 @REM
 @REM cpp clean [ n | dry ]
 @REM
@@ -66,8 +64,8 @@
 @REM        show what would be done
 @REM
 @REM    errorlevel value returned
-@REM    0           exit expectedly
-@REM    401         argument provided is invalid
+@REM    0           0x00        exit expectedly
+@REM    128         0x80        argument provided is invalid
 
 @if "%~1" == "" (
     echo Error: no operation provided
@@ -112,18 +110,17 @@
 :Init
 @REM init <chapter> <number-of-exercises>
 
-    @if "%~1" == "" exit /b 101
-    @if "%~2" == "" exit /b 102
+    @if "%~2" == "" exit /b 33
 
     @set /a "ch=%~1"
-    @if %ch% LSS %MIN_CH% exit /b 103
-    @if %ch% GTR %MAX_CH% exit /b 104
+    @if %ch% LSS %MIN_CH% exit /b 34
+    @if %ch% GTR %MAX_CH% exit /b 35
 
     @set /a "ex=%~2"
-    @if %ex% LSS %MIN_EX% exit /b 105
-    @if %ex% GTR %MAX_EX% exit /b 106
+    @if %ex% LSS %MIN_EX% exit /b 36
+    @if %ex% GTR %MAX_EX% exit /b 37
 
-    @if not exist "%TEMPLATE%" exit /b 107
+    @if not exist "%TEMPLATE%" exit /b 38
 
     @if not exist ch-%ch% md ch-%ch%
     @if %errorlevel% NEQ 0 (
@@ -148,18 +145,17 @@
 :CL
 @REM cl <chapter> <exercise> [ r[un] [ c[lean] ] ]
 
-    @if "%~1" == "" exit /b 201
-    @if "%~2" == "" exit /b 202
+    @if "%~2" == "" exit /b 65
 
     @set /a "ch=%~1"
-    @if %ch% LSS %MIN_CH% exit /b 203
-    @if %ch% GTR %MAX_CH% exit /b 204
+    @if %ch% LSS %MIN_CH% exit /b 66
+    @if %ch% GTR %MAX_CH% exit /b 67
 
     @set /a "ex=%~2"
-    @if %ex% LSS %MIN_EX% exit /b 205
-    @if %ex% GTR %MAX_EX% exit /b 206
+    @if %ex% LSS %MIN_EX% exit /b 68
+    @if %ex% GTR %MAX_EX% exit /b 69
 
-    @if not exist ch-%ch%\%ch%-%ex%.c exit /b 207
+    @if not exist ch-%ch%\%ch%-%ex%.c exit /b 71
 
     @set "run=%~3"
     @set "clean=%~4"
@@ -188,9 +184,9 @@
 :Edit
 @REM edit <chapter> [ <exercise> | n[ext] ] [<editor>]
 
-    @if "%~1" == "" exit /b 301
+    @if "%~1" == "" exit /b 96
 
-    @if not exist %TEMPLATE% exit /b 307
+    @if not exist %TEMPLATE% exit /b 102
 
     @set ex=
     @if "%~2" == "" (set "ex=next") else (
@@ -199,11 +195,11 @@
         )
     )
 
-    @if not "%ex%" == "next" if not "%ex%" == "%~2" exit /b 302
+    @if not "%ex%" == "next" if not "%ex%" == "%~2" exit /b 97
 
     @set /a "ch=%~1"
-    @if %ch% LSS %MIN_CH% exit /b 303
-    @if %ch% GTR %MAX_CH% exit /b 304
+    @if %ch% LSS %MIN_CH% exit /b 98
+    @if %ch% GTR %MAX_CH% exit /b 99
 
     @if not exist ch-%ch%\ md ch-%ch% || (
         echo cpp-edit: error: failed to create directory ch-%ch%
@@ -220,15 +216,15 @@
             )
         )
 
-        if not defined found exit /b 308
+        if not defined found exit /b 103
 
         set "fte=ch-%ch%\%ch%-!found!.c"
         @REM fte means file to edit
     ) else (
         @REM else of if "%ex%" == "next"
 
-        if %ex% LSS %MIN_EX% exit /b 305
-        if %ex% GTR %MAX_EX% exit /b 306
+        if %ex% LSS %MIN_EX% exit /b 100
+        if %ex% GTR %MAX_EX% exit /b 101
         set "fte=ch-%ch%\%ch%-%ex%.c"
     )
 
@@ -243,7 +239,7 @@
 
     @if "%~3" == "" (set "editor=%DEFAULT_EDITOR%") else set "editor=%~3"
 
-    @where %editor% 1>NUL 2>&1 && (%editor% %fte%) || exit /b 310
+    @where %editor% 1>NUL 2>&1 && (%editor% %fte%) || exit /b 104
 
     @exit /b 0
 
@@ -257,7 +253,7 @@
             set "dry=dry"
         ) else if /i "%~1" == "dry" (
             set "dry=dry"
-        ) else exit /b 401
+        ) else exit /b 128
     )
 
     @for /f %%i in ('dir /b /ad ch-* 2^>NUL') do @(
