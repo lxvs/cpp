@@ -1,5 +1,75 @@
 #!/bin/bash
 
+# This script is used in repo github.com/lxvs/cpp
+# Author:        lxvs <jn.apsd+batch@gmail.com>
+# Created:       2021-04-01
+# Last updated:  2021-04-27
+# Usage: cpp <operation> [<argument> ...]
+#
+#    Operation: init, cl, edit, clean
+#
+# cpp init <chapter> <number-of-exercises>
+#
+#    init a new chapter (e.g. ch.6, having 18 exercises) by:
+#        creating the folder ch-6
+#        copying TEMPLATE to ch-6\6-1.c, ch-6\6-2.c, ..., ch-6\6-18.c
+#
+#    errorlevel value returned
+#    0           0x00        exit expectedly
+#    33          0x21        number of exercises is not provided
+#    34/35       0x22/0x23   chapter number is too low/ too high
+#    36/37       0x24/0x25   exercise number is too low/ too high
+#    38          0x26        file TEMPLATE does not exist
+#
+# cpp gcc <chapter> <exercise> [ r[un] [ c[lean] ] ]
+#
+#    Build ch-<chapter>\<chapter>-<exercise>.c
+#
+#    If "run" is specified, run it if built successfully
+#    If "clean" is specified, delete generated .exe and .obj files
+#    You can use "rc" to specify run and clean
+#
+#    errorlevel value returned
+#    0           0x00        exit expectedly
+#    65          0x41        number of exercises is not provided
+#    66/67       0x42/0x43   chapter number is too low/ too high
+#    68/69       0x44/0x45   exercise number is too low/ too high
+#    71          0x47        the specified C file does not exist
+#
+# cpp edit <chapter> [ <exercise> | n[ext] ] [<editor>]
+#
+#    Use <editor> to edit ch-<chapter>\<chapter>-<exercise>.c
+#
+#    If "next" is specified, will open the first C file different
+#        from TEMPLATE. If all C files are different from TEMPLATE,
+#        will create a new C file of next exercise from TEMPLATE and
+#        open it with <editor>
+#    If <exercise> and "next" are both omitted, "next" is implied
+#    If <editor> is omitted, will use DEFAULT_EDITOR (default is Vim)
+#
+#    errorlevel value returned
+#    0           0x00        exit expectedly
+#    96          0x60        chapter is not provided
+#    97          0x61        exercise provided is invalid
+#    98/99       0x62/0x63   chapter number is too low/ too high
+#    100/101     0x64/0x65   exercise number is too low/ too high
+#    102         0x66        file TEMPLATE does not exist
+#    103         0x67        the number of existed exercises is MAX_EX
+#    104         0x68        editor provided or DEFAULT_EDITOR is invalid
+#
+# cpp clean [ n | dry ]
+#
+#    clean C files that are same with TEMPLATE
+#
+#    If "dry" or "n" is specified, won't actually delete anything, just
+#        show what would be done
+#
+#    errorlevel value returned
+#    0           0x00        exit expectedly
+#    128         0x80        argument provided is invalid
+
+
+
 if [[ $# -eq 0 ]]; then
     echo "Error: no operation provided" >&2
     echo "Read this script in editor for detailed usage" >&2
@@ -17,12 +87,12 @@ fi
 function Operate {
     case $1 in
         "init")
-            [[ $# -eq 3 ]] || return 32
-            [[ $2 -lt $MIN_CH ]] && return 33
-            [[ $2 -gt $MAX_CH ]] && return 34
-            [[ $3 -lt $MIN_EX ]] && return 35
-            [[ $3 -gt $MAX_EX ]] && return 36
-            [[ -e $TEMPLATE ]] || return 37
+            [[ $# -eq 3 ]] || return 33
+            [[ $2 -lt $MIN_CH ]] && return 34
+            [[ $2 -gt $MAX_CH ]] && return 35
+            [[ $3 -lt $MIN_EX ]] && return 36
+            [[ $3 -gt $MAX_EX ]] && return 37
+            [[ -e $TEMPLATE ]] || return 38
 
             [[ -d ch-$2 ]] || mkdir ch-$2
             if [[ $? -ne 0 ]];then
@@ -47,12 +117,12 @@ function Operate {
             ;;
 
         "gcc")
-            [[ $# -ge 3 ]] || return 64
-            [[ $2 -lt $MIN_CH ]] && return 65
-            [[ $2 -gt $MAX_CH ]] && return 66
-            [[ $3 -lt $MIN_EX ]] && return 67
-            [[ $3 -gt $MAX_EX ]] && return 68
-            [[ -e ch-$2/$2-$3.c ]] || return 69
+            [[ $# -ge 3 ]] || return 65
+            [[ $2 -lt $MIN_CH ]] && return 66
+            [[ $2 -gt $MAX_CH ]] && return 67
+            [[ $3 -lt $MIN_EX ]] && return 68
+            [[ $3 -gt $MAX_EX ]] && return 69
+            [[ -e ch-$2/$2-$3.c ]] || return 71
 
             run=$4
             cln=$5
