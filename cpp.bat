@@ -1,7 +1,7 @@
 @REM This script is used in repo github.com/lxvs/cpp
 @REM Author:        lxvs <jn.apsd+batch@gmail.com>
 @REM Created:       2021-04-01
-@REM Last updated:  2021-04-18
+@REM Last updated:  2021-04-27
 @REM
 @REM Usage: cpp <operation> [<argument> ...]
 @REM
@@ -143,7 +143,6 @@
         ) || echo cpp-init: warning: failed to copy %ch%-%%i.c
     ) else echo cpp-init: warning: %ch%-%%i.c exists, skipped.
 
-    @if %errorlevel% NEQ 0 echo cpp-init: warning: error level is %errorlevel% while script ended expectedly.
     @exit /b 0
 
 :CL
@@ -246,7 +245,6 @@
 
     @where %editor% 1>NUL 2>&1 && (%editor% %fte%) || exit /b 310
 
-    @if %errorlevel% NEQ 0 echo cpp-edit: warning: error level is %errorlevel% while script ended expectedly.
     @exit /b 0
 
 :Clean
@@ -275,6 +273,4 @@
         if "%dry%" == "" rd %%i 2>NUL && echo Removed %%i
     )
 
-    @if %errorlevel% NEQ 1 if %errorlevel% NEQ 0 echo cpp-clean: warning: error level is %errorlevel% while script ended expectedly
-    @REM FC command will set errorlevel to 1 expectedly
     @exit /b 0
