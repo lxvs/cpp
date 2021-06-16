@@ -1,5 +1,5 @@
 @REM This script is used in repo github.com/lxvs/cpp
-@REM Author:        lxvs <jn.apsd+batch@gmail.com>
+@REM Author:        lxvs <jn.apsd@gmail.com>
 @REM Last updated:  2021-04-27
 @REM
 @REM Usage: cpp <operation> [<argument> ...]
