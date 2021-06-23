@@ -1,8 +1,8 @@
 @echo off
 @setlocal EnableExtensions DisableDelayedExpansion
 
-set "rev=0.0.1"
-set "lastupdt=2021-06-19"
+set "rev=0.0.2"
+set "lastupdt=2021-06-23"
 title Cscratch v%rev%
 
 set "VsDevCmd_default=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
@@ -46,8 +46,8 @@ exit /b
 
 :logo
 echo;
-echo     Csratch v%rev%
-echo     https://lxvs.net/csratch
+echo     Cscratch v%rev%
+echo     https://lxvs.net/cscratch
 echo     Last updated: %lastupdt%
 echo;
 exit /b
