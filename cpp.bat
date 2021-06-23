@@ -1,5 +1,5 @@
 @REM https://lxvs.net/cpp
-@REM Version:       v0.1.0
+@REM Version:       v0.1.1
 @REM Last updated:  2021-06-23
 @REM
 @REM Usage: cpp <operation> [<argument> ...]
@@ -69,8 +69,8 @@
 @REM    128         0x80        argument provided is invalid
 
 @if "%~1" == "" (
-    echo Error: no operation provided
-    echo Read this script in editor for detailed usage
+    >&2 echo cpp: ERROR: No operation provided.
+    >&2 echo             Read this script in text editor for detailed usage.
     exit /b 1
 )
 
@@ -91,7 +91,7 @@
 @if /i "%~1" == "clean" set "op=%~1"
 
 @if "%op%" == "" (
-    echo Error: invalid operation: %~1
+    >&2 echo cpp: ERROR: invalid operation: %~1
     exit /b 1
 )
 
@@ -105,7 +105,7 @@
 
 :post_loop_gather_arg
 @call:%op%%allArgs%
-@if %errorlevel% NEQ 0 if /i not "%op%" == "cl" echo cpp-%op%: exit with error %errorlevel%
+@if %errorlevel% NEQ 0 if /i not "%op%" == "cl" @echo cpp-%op% terminated with error %errorlevel%
 @exit /b
 
 :Init
@@ -142,21 +142,21 @@
 
     @if not exist ch-%ch% md ch-%ch%
     @if %errorlevel% NEQ 0 (
-        echo cpp-init: error: failed to make directory "ch-%ch%"
+        >&2 echo cpp-init: ERROR: failed to make directory "ch-%ch%".
         exit /b
     )
 
     @pushd ch-%ch%
     @if %errorlevel% NEQ 0 (
-        echo cpp-init: error: failed to navigate to directory "ch-%ch%"
+        >&2 echo cpp-init: ERROR: failed to navigate to directory "ch-%ch%".
         exit /b
     )
 
     @for /L %%i in (1, 1, %ex%) do @if not exist %ch%-%%i.c (
         (copy ..\%template_init% %ch%-%%i.c)>NUL && (
-            echo cpp-init: %ch%-%%i.c copied.
-        ) || echo cpp-init: warning: failed to copy %ch%-%%i.c
-    ) else echo cpp-init: warning: %ch%-%%i.c exists, skipped.
+            @echo cpp-init: %ch%-%%i.c copied.
+        ) || >&2 echo cpp-init: warning: failed to copy %ch%-%%i.c
+    ) else >&2 echo cpp-init: warning: %ch%-%%i.c exists, skipped.
 
     @exit /b 0
 
@@ -192,7 +192,7 @@
     @if %errorlevel% EQU 0 (
         if /i "%run%" == "run" (
             %ch%-%ex%.exe
-            @if not "!errorlevel!" == "0" echo cpp-cl: %ch%-%ex%.exe returns !errorlevel!
+            @if not "!errorlevel!" == "0" @echo cpp-cl: %ch%-%ex%.exe returns !errorlevel!
         )
         if /i "%clean%" == "clean" del %ch%-%ex%.exe %ch%-%ex%.obj
     ) else exit /b
@@ -220,7 +220,7 @@
     @if %ch% GTR %MAX_CH% exit /b 99
 
     @if not exist ch-%ch%\ md ch-%ch% || (
-        echo cpp-edit: error: failed to create directory ch-%ch%
+        >&2 echo cpp-edit: ERROR: failed to create directory ch-%ch%
         exit /b 1
     )
 
@@ -250,8 +250,8 @@
         @echo cpp-edit: would create file %fte%
         copy %TEMPLATE% %fte% 1>NUL
         if !errorlevel! NEQ 0 (
-            @echo cpp-edit: error: failed to copy %TEMPLATE% to %fte%
-            @exit /b
+            >&2 echo cpp-edit: ERROR: failed to copy %TEMPLATE% to %fte%
+            exit /b
         )
     )
 
@@ -278,13 +278,13 @@
         for /f %%j in ('dir /b /a-d %%i\*.c 2^>NUL') do @(
             fc %TEMPLATE% "%%i\%%j" 1>NUL 2>&1 && (
                 if "%dry%" == "" (
-                    del "%%i\%%j" 1>NUL && echo Deleted %%i\%%j
+                    del "%%i\%%j" 1>NUL && @echo Deleted %%i\%%j
                 ) else (
-                    echo Would delete %%i\%%j
+                    @echo Would delete %%i\%%j
                 )
             )
         )
-        if "%dry%" == "" rd %%i 2>NUL && echo Removed %%i
+        if "%dry%" == "" rd %%i 2>NUL && @echo Removed %%i
     )
 
     @exit /b 0
