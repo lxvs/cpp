@@ -1,15 +1,18 @@
 @REM https://lxvs.net/cpp
-@REM Last updated:  2021-04-27
+@REM Version:       v0.1.0
+@REM Last updated:  2021-06-23
 @REM
 @REM Usage: cpp <operation> [<argument> ...]
 @REM
 @REM    Operation: init, cl, edit, clean
 @REM
-@REM cpp init <chapter> <number-of-exercises>
+@REM cpp init <chapter> <number-of-exercises> [<template>]
 @REM
 @REM    init a new chapter (e.g. ch.6, having 18 exercises) by:
 @REM        creating the folder ch-6
-@REM        copying TEMPLATE to ch-6\6-1.c, ch-6\6-2.c, ..., ch-6\6-18.c
+@REM        copying <template> to ch-6\6-1.c, ch-6\6-2.c, ..., ch-6\6-18.c
+@REM
+@REM    If <template> does not exist, will use TEMPLATE and throw a warnning.
 @REM
 @REM    errorlevel value returned
 @REM    0           0x00        exit expectedly
@@ -106,7 +109,7 @@
 @exit /b
 
 :Init
-@REM init <chapter> <number-of-exercises>
+@REM init <chapter> <number-of-exercises> [<template>]
 
     @if "%~2" == "" exit /b 33
 
@@ -118,7 +121,24 @@
     @if %ex% LSS %MIN_EX% exit /b 36
     @if %ex% GTR %MAX_EX% exit /b 37
 
-    @if not exist "%TEMPLATE%" exit /b 38
+    @set "template_init=%~3"
+    @if defined template_init (
+        if not exist "%template_init%" (
+            if exist "%TEMPLATE%" (
+                >&2 echo cpp-init: warning: Invalid specified template: %template_init%
+                >&2 echo                    Will use default template ^(%TEMPLATE%^).
+                set "template_init=%TEMPLATE%"
+            ) else (
+                exit /b 38
+            )
+        )
+    ) else (
+        if exist "%TEMPLATE%" (
+            set "template_init=%TEMPLATE%"
+        ) else (
+            exit /b 38
+        )
+    )
 
     @if not exist ch-%ch% md ch-%ch%
     @if %errorlevel% NEQ 0 (
@@ -133,7 +153,7 @@
     )
 
     @for /L %%i in (1, 1, %ex%) do @if not exist %ch%-%%i.c (
-        (copy ..\%TEMPLATE% %ch%-%%i.c)>NUL && (
+        (copy ..\%template_init% %ch%-%%i.c)>NUL && (
             echo cpp-init: %ch%-%%i.c copied.
         ) || echo cpp-init: warning: failed to copy %ch%-%%i.c
     ) else echo cpp-init: warning: %ch%-%%i.c exists, skipped.
