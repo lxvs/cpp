@@ -1,20 +1,21 @@
 @echo off
 @setlocal EnableExtensions DisableDelayedExpansion
 
-set "rev=0.0.2"
-set "lastupdt=2021-06-23"
+set "rev=0.0.3"
+set "lastupdt=2021-06-24"
 title Cscratch v%rev%
 
-set "VsDevCmd_default=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
-if not defined VsDevCmd set "VsDevCmd=%VsDevCmd_default%"
 set "startup_path=%~dp0"
 
-if not exist "%VsDevCmd%" (
-    >&2 echo ERROR: Could not find file VsDevCmd.bat
-    >&2 echo Please define environment variable VsDevCmd to the location of VsDevCmd.bat on your computer.
-    >&2 echo For example, set "VsDevCmd=%VsDevCmd_default%"
-    exit /b 1
-)
+set "VsDevCmd_default_cm=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
+set "VsDevCmd_default_bt=C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\VsDevCmd.bat"
+if not defined VsDevCmd (
+    if exist "%VsDevCmd_default_cm%" (
+        set "VsDevCmd=%VsDevCmd_default_cm%"
+    ) else if exist "%VsDevCmd_default_bt%" (
+        set "VsDevCmd=%VsDevCmd_default_bt%"
+    ) else goto err_FNF
+) else if not exist "%VsDevCmd%" goto err_FNF
 
 set "batchname=%~nx0"
 set "batchfolder=%~dp0"
@@ -51,3 +52,10 @@ echo     https://lxvs.net/cscratch
 echo     Last updated: %lastupdt%
 echo;
 exit /b
+
+:err_FNF
+>&2 echo ERROR: Could not find file VsDevCmd.bat
+>&2 echo Please define environment variable VsDevCmd to the location of VsDevCmd.bat on your computer.
+>&2 echo Visit https://lxvs.net/cscratch for detailed information.
+pause
+exit /b 1
