@@ -1,6 +1,6 @@
 @REM https://lxvs.net/cpp
-@REM Version:       v0.1.1
-@REM Last updated:  2021-06-23
+@REM Version:       v0.1.2
+@REM Last updated:  2021-06-24
 @REM
 @REM Usage: cpp <operation> [<argument> ...]
 @REM
@@ -70,7 +70,7 @@
 
 @if "%~1" == "" (
     >&2 echo cpp: ERROR: No operation provided.
-    >&2 echo             Read this script in text editor for detailed usage.
+    >&2 echo Read this script or visit https://lxvs.net/cpp for detailed usage.
     exit /b 1
 )
 
@@ -85,6 +85,10 @@
 @if not defined DEFAULT_EDITOR set "DEFAULT_EDITOR=Vim"
 
 @set op=
+@if "%~1" == "/?" (
+    @echo Read this script or visit https://lxvs.net/cpp for detailed usage.
+    exit /b
+)
 @if /i "%~1" == "init" set "op=%~1"
 @if /i "%~1" == "cl" set "op=%~1"
 @if /i "%~1" == "edit" set "op=%~1"
@@ -99,6 +103,10 @@
 @shift
 :loop_gather_arg
 @if "%~1" == "" goto post_loop_gather_arg
+@if "%~1" == "/?" (
+    @echo Read this script or visit https://lxvs.net/cpp for detailed usage.
+    exit /b
+)
 @set allArgs=%allArgs% %1
 @shift
 @goto loop_gather_arg
