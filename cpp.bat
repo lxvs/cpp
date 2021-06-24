@@ -1,5 +1,5 @@
 @REM https://lxvs.net/cpp
-@REM Version:       v0.2.0
+@REM Version:       v0.3.0
 @REM Last updated:  2021-06-24
 @REM
 @REM Usage: cpp <operation> [<argument> ...]
@@ -68,10 +68,13 @@
 @REM    0           0x00        exit expectedly
 @REM    128         0x80        argument provided is invalid
 @REM
-@REM cpp ls [ f[ast] ]
+@REM cpp ls [ f[ast] ] [<opening-chapter>]
 @REM
 @REM    If "fast" is specified, show existing exercises. Otherwise, will not
 @REM    display files that are same with TEMPLATE.
+@REM
+@REM    If <opening-chapter> is specified, will not displays chapters that
+@REM    are before it.
 
 @echo off
 
@@ -313,35 +316,42 @@
     @exit /b 0
 
 :ls
-@REM ls [ f[ast] ]
+@REM ls [ f[ast] ] [<opening-chapter>]
 
-set "fast=%~1"
-if /i "%fast%" == "f" set "fast=fast"
-if /i "%fast%" NEQ "" if /i "%fast%" NEQ "fast" (
-    >&2 echo cpp-ls: ERROR: Unrecognized argument: %fast%
+set "fast="
+set /a "oc=0"
+:ls_parse_arg
+if "%~1" == "" goto ls_parse_arg_end
+set "arg=%~1"
+set /a "arga=arg"
+if /i "%arg%" == "f" (
+    set "fast=fast"
+) else if /i "%arg%" == "fast" (
+    set "fast=fast"
+) else if "%arga%" == "%arg%" (
+    set /a "oc=arga"
+) else (
+    >&2 echo cpp-ls: ERROR: Unrecognized argument: %arg%
     exit /b 1
 )
+if "%~2" NEQ "" (
+    shift
+    goto ls_parse_arg
+)
+:ls_parse_arg_end
+
 for /f "tokens=2 delims=-" %%i in ('dir /b /ad ch-* 2^>NUL') do (
-    set "chDisp="
-    set /a "index=0"
-    setlocal
-    for /f "tokens=2 delims=-" %%I in ('dir /b /a-d ch-%%i\*.c 2^>NUL') do (
-        set "num=00000%%I"
-        set "num=!num:~-5!"
-        set "cppls$!num!=%%I"
-    )
-    for /f "tokens=2,* delims==" %%a in ('set cppls$') do (
-        if /i "%fast%" == "fast" (
-            if not defined chDisp (
-                set "chDisp=1"
-                echo;
-                echo Chapter %%i
-            )
-            if !index! EQU 0 echo;
-            set /p=%%i-%%a		<nul
-            set /a "index=(!index!+1)%%5"
-        ) else (
-            fc "%TEMPLATE%" "ch-%%i\%%i-%%a" 1>NUL 2>&1 || (
+    if %oc% LEQ %%i (
+        set "chDisp="
+        set /a "index=0"
+        setlocal
+        for /f "tokens=2 delims=-" %%I in ('dir /b /a-d ch-%%i\*.c 2^>NUL') do (
+            set "num=00000%%I"
+            set "num=!num:~-5!"
+            set "cppls$!num!=%%I"
+        )
+        for /f "tokens=2,* delims==" %%a in ('set cppls$') do (
+            if /i "%fast%" == "fast" (
                 if not defined chDisp (
                     set "chDisp=1"
                     echo;
@@ -350,11 +360,22 @@ for /f "tokens=2 delims=-" %%i in ('dir /b /ad ch-* 2^>NUL') do (
                 if !index! EQU 0 echo;
                 set /p=%%i-%%a		<nul
                 set /a "index=(!index!+1)%%5"
+            ) else (
+                fc "%TEMPLATE%" "ch-%%i\%%i-%%a" 1>NUL 2>&1 || (
+                    if not defined chDisp (
+                        set "chDisp=1"
+                        echo;
+                        echo Chapter %%i
+                    )
+                    if !index! EQU 0 echo;
+                    set /p=%%i-%%a		<nul
+                    set /a "index=(!index!+1)%%5"
+                )
             )
         )
+        if defined chDisp echo;
+        endlocal
     )
-    if defined chDisp echo;
-    endlocal
 )
 
 exit /b 0
