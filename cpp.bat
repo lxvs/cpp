@@ -1,5 +1,5 @@
 @REM https://lxvs.net/cpp
-@REM Version:       v0.1.3
+@REM Version:       v0.1.4
 @REM Last updated:  2021-06-24
 @REM
 @REM Usage: cpp <operation> [<argument> ...]
@@ -67,6 +67,8 @@
 @REM    errorlevel value returned
 @REM    0           0x00        exit expectedly
 @REM    128         0x80        argument provided is invalid
+
+@echo off
 
 @if "%~1" == "" (
     >&2 echo cpp: ERROR: No operation provided.
