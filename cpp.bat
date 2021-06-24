@@ -1,5 +1,5 @@
 @REM https://lxvs.net/cpp
-@REM Version:       v0.1.2
+@REM Version:       v0.1.3
 @REM Last updated:  2021-06-24
 @REM
 @REM Usage: cpp <operation> [<argument> ...]
@@ -282,6 +282,13 @@
         ) else exit /b 128
     )
 
+    @for /f %%i in ('dir /b /a-d *.exe *.obj *.out 2^>NUL') do @(
+        if "%dry%" == "" (
+            del "%%i" 1>NUL && @echo Deleted %%i
+        ) else (
+            @echo Would delete %%i
+        )
+    )
     @for /f %%i in ('dir /b /ad ch-* 2^>NUL') do @(
         for /f %%j in ('dir /b /a-d %%i\*.c 2^>NUL') do @(
             fc %TEMPLATE% "%%i\%%j" 1>NUL 2>&1 && (
