@@ -1,10 +1,10 @@
 @REM https://lxvs.net/cpp
-@REM Version:       v0.1.4
+@REM Version:       v0.2.0
 @REM Last updated:  2021-06-24
 @REM
 @REM Usage: cpp <operation> [<argument> ...]
 @REM
-@REM    Operation: init, cl, edit, clean
+@REM    Operation: init, cl, edit, clean, ls
 @REM
 @REM cpp init <chapter> <number-of-exercises> [<template>]
 @REM
@@ -67,6 +67,11 @@
 @REM    errorlevel value returned
 @REM    0           0x00        exit expectedly
 @REM    128         0x80        argument provided is invalid
+@REM
+@REM cpp ls [ f[ast] ]
+@REM
+@REM    If "fast" is specified, show existing exercises. Otherwise, will not
+@REM    display files that are same with TEMPLATE.
 
 @echo off
 
@@ -95,6 +100,7 @@
 @if /i "%~1" == "cl" set "op=%~1"
 @if /i "%~1" == "edit" set "op=%~1"
 @if /i "%~1" == "clean" set "op=%~1"
+@if /i "%~1" == "ls" set "op=%~1"
 
 @if "%op%" == "" (
     >&2 echo cpp: ERROR: invalid operation: %~1
@@ -305,3 +311,50 @@
     )
 
     @exit /b 0
+
+:ls
+@REM ls [ f[ast] ]
+
+set "fast=%~1"
+if /i "%fast%" == "f" set "fast=fast"
+if /i "%fast%" NEQ "" if /i "%fast%" NEQ "fast" (
+    >&2 echo cpp-ls: ERROR: Unrecognized argument: %fast%
+    exit /b 1
+)
+for /f "tokens=2 delims=-" %%i in ('dir /b /ad ch-* 2^>NUL') do (
+    set "chDisp="
+    set /a "index=0"
+    setlocal
+    for /f "tokens=2 delims=-" %%I in ('dir /b /a-d ch-%%i\*.c 2^>NUL') do (
+        set "num=00000%%I"
+        set "num=!num:~-5!"
+        set "cppls$!num!=%%I"
+    )
+    for /f "tokens=2,* delims==" %%a in ('set cppls$') do (
+        if /i "%fast%" == "fast" (
+            if not defined chDisp (
+                set "chDisp=1"
+                echo;
+                echo Chapter %%i
+            )
+            if !index! EQU 0 echo;
+            set /p=%%i-%%a		<nul
+            set /a "index=(!index!+1)%%5"
+        ) else (
+            fc "%TEMPLATE%" "ch-%%i\%%i-%%a" 1>NUL 2>&1 || (
+                if not defined chDisp (
+                    set "chDisp=1"
+                    echo;
+                    echo Chapter %%i
+                )
+                if !index! EQU 0 echo;
+                set /p=%%i-%%a		<nul
+                set /a "index=(!index!+1)%%5"
+            )
+        )
+    )
+    if defined chDisp echo;
+    endlocal
+)
+
+exit /b 0
